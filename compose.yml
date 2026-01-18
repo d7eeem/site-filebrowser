@@ -1,0 +1,11 @@
+services:
+  file-browser:
+    build: .
+    container_name: minimal-file-browser
+    ports:
+      - "8800:80"
+    volumes:
+      - ./html:/var/www/html
+    restart: unless-stopped
+    environment:
+      - TZ=UTC
