@@ -79,6 +79,7 @@ site-filebrowser/
 ├── nginx.conf                     # Nginx configuration
 ├── new-page.sh                    # Page creation script (Bash)
 ├── new-page.py                    # Page creation script (Python)
+├── html.json                      # VS Code snippet (optional)
 └── README.md                      # This file
 ```
 
@@ -123,6 +124,28 @@ nano html/posts/my-new-post.html
 ```
 
 Update the title, heading, and content between the `<main>` tags.
+
+### VS Code Snippet (Fastest)
+
+For frequent page creation, install a custom snippet:
+
+1. **Open VS Code**
+2. **File → Preferences → Configure User Snippets**
+3. **Select "html.json"** (or create it)
+4. **Copy the snippet from `html.json` in the repo**
+5. **Save the file**
+
+Now in any `.html` file:
+- Type `minpage`
+- Press `Tab`
+- Instantly get a complete page template!
+
+The snippet auto-fills:
+- Current date
+- Page title (type once, appears in `<title>` and `<h1>`)
+- Cursor positioned for content
+
+This is the **fastest way** to create new pages!
 
 ### Page Template Structure
 
@@ -311,6 +334,28 @@ files.example.com {
 ```
 
 ## 🛠️ Development
+
+### IDE Setup (VS Code)
+
+For the best development experience, install the VS Code snippet:
+
+```bash
+# The html.json file is included in the repo
+# Copy it to your VS Code snippets folder:
+
+# macOS/Linux
+mkdir -p ~/.config/Code/User/snippets/
+cp html.json ~/.config/Code/User/snippets/html.json
+
+# Windows
+copy html.json %APPDATA%\Code\User\snippets\html.json
+
+# Or manually via VS Code:
+# File → Preferences → Configure User Snippets → html.json
+# Then paste the content from the repo's html.json
+```
+
+Now type `minpage` + Tab in any HTML file for instant page creation!
 
 ### Project Structure
 
