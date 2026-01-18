@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Page Title</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<h1>Page Title</h1>
+<p>-</p>
+
+<p>This is a paragraph. You can write your content here in clean, readable text. Links look like <a href="#"><i>this</i></a> with a subtle dotted underline.</p>
+
+<h2>Section Heading</h2>
+
+<p>Use <code>inline code</code> for technical terms or <span class="highlight">highlight important text</span>.</p>
+
+<p>Lists are minimal and clean:</p>
+
+<ul>
+<li>First item with some descriptive text</li>
+<li>Second item can have <a href="#"><i>links too</i></a></li>
+<li>Third item keeps it simple</li>
+</ul>
+
+<h2>Code Blocks</h2>
+
+<pre>// Code blocks have subtle styling
+function example() {
+  return "clean and readable";
+}</pre>
+
+<h2>Blockquotes</h2>
+
+<blockquote>
+A simple blockquote with italic text and a subtle left border.
+</blockquote>
+
+<p>Ordered lists work too:</p>
+
+<ol>
+<li>First numbered item</li>
+<li>Second numbered item</li>
+<li>Third numbered item</li>
+</ol>
+
+<h2>Images</h2>
+
+<p>Images are full-width and responsive:</p>
+
+<!-- <img src="image.png" alt="Description"> -->
+
+<p>Strike through text looks like <span class="strike">this</span>.</p>
+
+<time>2026-01-18</time>
+
+</main>
+<footer>
+<p><a href="../"><i>../</i></a></p>
+<button class="theme-toggle" onclick="toggleTheme()">◐</button>
+</footer>
+<script>
+function toggleTheme() {
+  location.hash = location.hash === '#dark' ? '' : '#dark';
+}
+if (location.hash === '#dark') document.body.classList.add('dark');
+</script>
+</body>
+</html>
