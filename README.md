@@ -335,7 +335,9 @@ files.example.com {
 
 ## 🛠️ Development
 
-### IDE Setup (VS Code)
+### IDE Setup
+
+#### VS Code
 
 For the best development experience, install the VS Code snippet:
 
@@ -356,6 +358,100 @@ copy html.json %APPDATA%\Code\User\snippets\html.json
 ```
 
 Now type `minpage` + Tab in any HTML file for instant page creation!
+
+#### Neovim/Vim (UltiSnips)
+
+For Neovim/Vim users with UltiSnips:
+
+```bash
+# Create snippets directory if it doesn't exist
+mkdir -p ~/.config/nvim/UltiSnips
+
+# Create HTML snippets file
+nvim ~/.config/nvim/UltiSnips/html.snippets
+```
+
+Add this snippet:
+
+```snippets
+snippet minpage "Minimal page template"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${1:Page Title}</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+<h1>$1</h1>
+<p>-</p>
+
+<p>${2:Content here...}</p>
+
+<time>`date +%Y-%m-%d`</time>
+
+</main>
+<footer>
+<p><a href="../"><i>../</i></a></p>
+<button class="theme-toggle" onclick="toggleTheme()">◐</button>
+</footer>
+<script>
+function toggleTheme() {
+  location.hash = location.hash === '#dark' ? '' : '#dark';
+}
+if (location.hash === '#dark') document.body.classList.add('dark');
+</script>
+</body>
+</html>
+$0
+endsnippet
+```
+
+Usage: Type `minpage` + Tab in any HTML file!
+
+#### Neovim (LuaSnip)
+
+For Neovim users with LuaSnip:
+
+```bash
+# Create snippets directory
+mkdir -p ~/.config/nvim/luasnippets
+nvim ~/.config/nvim/luasnippets/html.lua
+```
+
+Add this snippet:
+
+```lua
+local ls = require("luasnip")
+local s = ls.snippet
+local t = ls.text_node
+local i = ls.insert_node
+local f = ls.function_node
+
+return {
+  s("minpage", {
+    t({"<!DOCTYPE html>", "<html lang=\"en\">", "<head>", "<meta charset=\"utf-8\">", 
+       "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">", "<title>"}),
+    i(1, "Page Title"),
+    t({"</title>", "<link rel=\"stylesheet\" href=\"/style.css\">", "</head>", "<body>", "<main>", "<h1>"}),
+    f(function(args) return args[1][1] end, {1}),
+    t({"</h1>", "<p>-</p>", "", "<p>"}),
+    i(2, "Content here..."),
+    t({"</p>", "", "<time>"}),
+    f(function() return os.date("%Y-%m-%d") end),
+    t({"</time>", "", "</main>", "<footer>", "<p><a href=\"../\"><i>../</i></a></p>",
+       "<button class=\"theme-toggle\" onclick=\"toggleTheme()\">◐</button>", "</footer>",
+       "<script>", "function toggleTheme() {", "  location.hash = location.hash === '#dark' ? '' : '#dark';",
+       "}", "if (location.hash === '#dark') document.body.classList.add('dark');",
+       "</script>", "</body>", "</html>"}),
+    i(0)
+  })
+}
+```
+
+Usage: Type `minpage` + Tab in any HTML file!
 
 ### Project Structure
 
@@ -462,6 +558,129 @@ docker logs site-filebrowser
 docker-compose down
 docker-compose up -d --build
 ```
+
+## 🔒 Security
+
+### Built-in Protections
+
+✅ **Path Traversal Prevention**
+- Nginx blocks `..` sequences in URLs
+- Generator validates all paths against allowed root
+- Container isolation prevents filesystem escape
+
+✅ **Hidden File Protection**
+- All dotfiles (`.git`, `.env`, etc.) are blocked
+- Backup files (`~`, `.bak`) are denied
+- System files are never exposed
+
+✅ **Security Headers**
+- `X-Frame-Options: SAMEORIGIN` (prevents clickjacking)
+- `X-Content-Type-Options: nosniff` (prevents MIME sniffing)
+- `X-XSS-Protection: 1; mode=block` (XSS protection)
+
+✅ **Read-Only Operation**
+- No file upload capability
+- No modification through web interface
+- Static file serving only
+
+### Best Practices
+
+**1. Mount Only What You Need**
+
+❌ **DANGEROUS:**
+```yaml
+volumes:
+  - /:/var/www/html  # Exposes entire system!
+  - /home:/var/www/html  # Exposes all user files!
+```
+
+✅ **SAFE:**
+```yaml
+volumes:
+  - ./html:/var/www/html  # Only your content directory
+  - /path/to/specific/folder:/var/www/html
+```
+
+**2. Use Read-Only Mounts (Optional)**
+
+For extra security, mount volumes as read-only:
+
+```yaml
+volumes:
+  - ./html:/var/www/html:ro  # Read-only mount
+```
+
+Note: This prevents auto-generation. You'd need to generate indexes outside the container.
+
+**3. Run Behind Reverse Proxy**
+
+Add HTTPS and additional security with Nginx/Caddy:
+
+```nginx
+# Nginx reverse proxy with SSL
+server {
+    listen 443 ssl http2;
+    server_name files.example.com;
+    
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+    
+    # Additional security headers
+    add_header Strict-Transport-Security "max-age=31536000" always;
+    
+    location / {
+        proxy_pass http://localhost:8800;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+**4. Restrict Network Access**
+
+Limit who can access the service:
+
+```yaml
+# compose.yml
+services:
+  file-browser:
+    ports:
+      - "127.0.0.1:8800:80"  # Only accessible from localhost
+```
+
+Then use SSH tunnel or VPN for remote access.
+
+**5. Regular Updates**
+
+```bash
+# Pull latest security updates
+docker-compose pull
+docker-compose up -d
+
+# Or rebuild from source
+git pull
+docker-compose up -d --build
+```
+
+### What's NOT Protected
+
+⚠️ **No Authentication** - Anyone with access can view files
+⚠️ **No Encryption** - Use HTTPS via reverse proxy for sensitive data
+⚠️ **Volume Mount Security** - Your responsibility to mount safely
+⚠️ **DoS Protection** - No rate limiting (add via reverse proxy)
+
+### Production Deployment Checklist
+
+- [ ] Mount only necessary directories
+- [ ] Set up HTTPS via reverse proxy
+- [ ] Restrict network access (firewall/IP whitelist)
+- [ ] Regular security updates
+- [ ] Monitor access logs
+- [ ] Don't expose sensitive files
+- [ ] Use strong file permissions on host
+- [ ] Consider authentication (Authelia, OAuth2 Proxy, etc.)
 
 ## 🤝 Contributing
 

@@ -13,6 +13,17 @@ EXCLUDE_PATTERNS = {
     '.gitignore', 'README.md'
 }
 
+# Security: Define the allowed root directory
+ALLOWED_ROOT = Path('/var/www/html')
+
+def is_safe_path(path):
+    """Verify path is within allowed root directory"""
+    try:
+        resolved = Path(path).resolve()
+        return resolved.is_relative_to(ALLOWED_ROOT)
+    except (ValueError, RuntimeError):
+        return False
+
 def format_size(size):
     """Format file size in bytes to human readable format"""
     if size < 1024:
@@ -138,11 +149,21 @@ def generate_all(root_dir):
     """Generate index.html files for all directories"""
     root_path = Path(root_dir)
     
+    # Security check: verify root path is safe
+    if not is_safe_path(root_path):
+        print(f"ERROR: Path {root_path} is outside allowed directory!")
+        return
+    
     for dirpath, dirnames, filenames in os.walk(root_path):
         # Filter out excluded directories
         dirnames[:] = [d for d in dirnames if not should_exclude(d)]
         
         current_dir = Path(dirpath)
+        
+        # Security check: verify each directory is safe
+        if not is_safe_path(current_dir):
+            print(f"WARNING: Skipping unsafe path: {current_dir}")
+            continue
         
         # Generate single index.html with dark theme support
         html = generate_html(current_dir)
