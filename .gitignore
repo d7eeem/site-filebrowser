@@ -1,0 +1,25 @@
+# Docker
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# HTML content (optional - uncomment if you don't want to commit content)
+# html/*
+# !html/.gitkeep
+
+# Generated files
+html/index.html
+html/**/index.html
