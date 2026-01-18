@@ -146,8 +146,15 @@ def generate_all(root_dir):
         
         # Generate single index.html with dark theme support
         html = generate_html(current_dir)
-        with open(current_dir / 'index.html', 'w') as f:
+        index_file = current_dir / 'index.html'
+        with open(index_file, 'w') as f:
             f.write(html)
+        
+        # Set proper permissions (readable by nginx user)
+        try:
+            os.chmod(index_file, 0o644)
+        except Exception as e:
+            print(f"Warning: Could not set permissions on {index_file}: {e}")
         
         print(f"Generated index for: {current_dir}")
 
